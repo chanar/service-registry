@@ -1,0 +1,9 @@
+{
+  "username": "",
+  "password": null,
+  "database": "Services",
+  "host": "localhost",
+  "dialect": "sqlite",
+  "storage": "./database/database.db",
+  "logging": false
+}
