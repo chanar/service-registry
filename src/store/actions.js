@@ -8,7 +8,7 @@ export const actions = {
   showModal({ commit, state }, item) {
     commit('SET_MODAL', {
       show: true,
-      item: item || state.modalItemNew
+      item: item || JSON.parse(JSON.stringify(state.modalItemNew))
     })
   },
 
