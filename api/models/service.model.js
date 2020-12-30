@@ -5,6 +5,10 @@ module.exports = function(sequelize, DataTypes) {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+          args: true,
+          msg: 'Service name already in use.'
+        },
         validate: {
           notNull: { msg: 'Service name is required.' },
           notEmpty: { msg: 'Service name is required.' }
@@ -28,11 +32,23 @@ module.exports = function(sequelize, DataTypes) {
       },
       active: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: true,
+        allowNull: false,
+        validate: {
+          isBoolean: { msg: 'Status accepts only boolean values.' }
+        }
       }
     },
     {
       timestamps: true
+    },
+    {
+      indexes: [
+        {
+          fields: ['name'],
+          unique: true
+        }
+      ]
     }
   )
   return ServiceSchema

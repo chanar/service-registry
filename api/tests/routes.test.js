@@ -17,8 +17,15 @@ let payload = {
   active: true
 }
 
+let payloadUpdate = {
+  name: 'Test service Updated',
+  owner: 'Admin2',
+  description: 'Node test description updated',
+  active: false
+}
+
 describe('Service API', () => {
-  it('should validate on creation', async () => {
+  it('should validate empty fields on creation', async () => {
     const res = await request(app)
       .post('/api/service')
       .send({})
@@ -49,6 +56,22 @@ describe('Service API', () => {
     expect(res.body).toMatchObject(payload)
   })
 
+  it('should return error on duplicate service name', async () => {
+    const res = await request(app)
+      .post('/api/service')
+      .send(payload)
+
+    expect(res.statusCode).toEqual(500)
+    expect(res.body).toMatchObject({
+      message: 'Service cannot be created.',
+      errors: [
+        {
+          message: 'Service name already in use.'
+        }
+      ]
+    })
+  })
+
   it('should show all services', async () => {
     const res = await request(app).get('/api/service')
     expect(res.statusCode).toEqual(200)
@@ -62,7 +85,7 @@ describe('Service API', () => {
     expect(res.body).toMatchObject(payload)
   })
 
-  it('should validate on update', async () => {
+  it('should validate empty fields on update', async () => {
     const res = await request(app)
       .put('/api/service/1')
       .send({
@@ -88,9 +111,26 @@ describe('Service API', () => {
     })
   })
 
+  it('should allow only boolean value for field "active"', async () => {
+    const res = await request(app)
+      .put('/api/service/1')
+      .send({
+        active: 'Not a boolean'
+      })
+
+    expect(res.statusCode).toEqual(500)
+    expect(res.body).toMatchObject({
+      message: 'Service cannot be updated.',
+      errors: [
+        {
+          message: 'Status accepts only boolean values.'
+        }
+      ]
+    })
+  })
+
   it('should update a service', async () => {
     payload.name = 'Test service updated'
-    payload.active = false
 
     const res = await request(app)
       .put('/api/service/1')
@@ -100,16 +140,17 @@ describe('Service API', () => {
     expect(res.body).toMatchObject(payload)
   })
 
-  it('should be able to update values separately', async () => {
-    const res = await request(app)
-      .put('/api/service/1')
-      .send({
-        active: true
-      })
+  Object.keys(payloadUpdate).forEach(function(key) {
+    let testObj = new Object()
+    it(`should be able to update ${key} separately`, async () => {
+      testObj[key] = payloadUpdate[key]
 
-    expect(res.statusCode).toEqual(200)
-    expect(res.body).toMatchObject({
-      active: true
+      const res = await request(app)
+        .put('/api/service/1')
+        .send(testObj)
+
+      expect(res.statusCode).toEqual(200)
+      expect(res.body).toMatchObject(testObj)
     })
   })
 
